@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+
+<head>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        #shadow {
+            position: absolute;
+            left: 100px;
+            top: 100px;
+            height: 200px;
+            width: 200px;
+            z-index: 100;
+            border-radius: 50%;
+            background-repeat: no-repeat;
+            background-image: url(./image.jfif);
+            overflow: hidden;
+        }
+
+
+    </style>
+</head>
+
+<body>
+    <div id="shadow">
+    </div>
+    <script>
+        var streetImg = {
+            width: 640,
+            height: 480
+        };
+        var shadowSize = {
+            width: 200,
+            height: 200
+        }
+        function pos() {
+            var x = parseInt(Math.random() * (streetImg.width - shadowSize.width), 10);
+            var y = parseInt(Math.random() * (streetImg.height - shadowSize.height), 10);
+
+            return {
+                x: x,
+                y: y
+            }
+        }
+
+        var SPD = {
+            slow: 100,
+            mid: 200,
+            fast: 24
+        }
+
+        moveTo((streetImg.width-shadowSize.width)/2, (streetImg.height-shadowSize.height)/2, (pos()).x, (pos()).y);
+
+        console.log(pos1.x, pos1.y, pos2.x, pos2.y);
+
+        function moveTo(srcX, srcY, dstX, dstY) {
+            var spd = 0;
+            var k = (dstY - srcY) / (dstX - srcX);
+            var b = srcY - (k * srcX);
+            step(srcX, k, b, srcX < dstX, dstX, SPD.fast);
+        }
+
+        function step(x, k, b, dir, end, spd) {
+            setTimeout(function () {
+                x = dir ? x + 1 : x - 1;
+                var y = Math.floor(k * x + b);
+                console.log(x, y);
+                if(dir) {
+                    if(x >= end) {
+                        moveTo(x, y, (pos()).x, (pos()).y);
+                        return;
+                    }
+                }
+                else{
+                    if(x <= end) {
+                        moveTo(x, y, (pos()).x, (pos()).y);
+                        return;
+                    }
+                }
+                document.getElementById("shadow").style.backgroundPositionX = "-" + x + "px";
+                document.getElementById("shadow").style.backgroundPositionY = "-" + y + "px";
+                step(x, k, b, dir, end, spd);
+            }, spd);
+        }
+    </script>
+</body>
