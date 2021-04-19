@@ -33,17 +33,45 @@
     <div id="shadow">
     </div>
     <script>
+        const kRrange = 80; // k range on y index
+
+        // speed of the redraw
+        const SPD = {
+            slow: 100,
+            mid: 200,
+            fast: 24
+        }
+
+        var shadowEle = document.getElementById("shadow"); // element for shadow
+
         var streetImg = {
             width: 640,
             height: 480
         };
         var shadowSize = {
-            width: 200,
-            height: 200
+            width: shadowEle.clientWidth,
+            height: shadowEle.clientHeight
         }
-        function pos() {
+        // center of bgimg
+        var startPos = {
+            x: (streetImg.width-shadowSize.width)/2,
+            y: (streetImg.height-shadowSize.height)/2
+        }
+        // start the first step
+        moveTo(startPos.x, startPos.y, (pos(startPos.x, startPos.y)).x, (pos(startPos.x, startPos.y)).y);
+
+        /**
+         * return a random position
+         * @param cx current x pos but useless right now
+         * @param cy current y pos
+         * @return obj {x, y}
+         */
+        function pos(cx, cy) {
+            var totalHeight = streetImg.height - shadowSize.height;
             var x = parseInt(Math.random() * (streetImg.width - shadowSize.width), 10);
-            var y = parseInt(Math.random() * (streetImg.height - shadowSize.height), 10);
+            var yMax = totalHeight - cy > kRrange ? cy + kRrange : totalHeight;
+            var yMin = cy - kRrange > 0 ? cy - kRrange : 0;
+            var y = parseInt(Math.random() * (yMax - yMin) + yMin, 10);
 
             return {
                 x: x,
@@ -51,16 +79,12 @@
             }
         }
 
-        var SPD = {
-            slow: 100,
-            mid: 200,
-            fast: 24
-        }
 
-        moveTo((streetImg.width-shadowSize.width)/2, (streetImg.height-shadowSize.height)/2, (pos()).x, (pos()).y);
-
-        console.log(pos1.x, pos1.y, pos2.x, pos2.y);
-
+        /**
+         * move to another pos draw a line (y = kx + b)
+         * @param srcX, srcY source position
+         * @param dstX, dstY destination
+         */
         function moveTo(srcX, srcY, dstX, dstY) {
             var spd = 0;
             var k = (dstY - srcY) / (dstX - srcX);
@@ -68,26 +92,35 @@
             step(srcX, k, b, srcX < dstX, dstX, SPD.fast);
         }
 
+        /**
+         * move a step with speed
+         * @param x dst pos x
+         * @param k slope
+         * @param b offset
+         * @dir true: move up | false: move down
+         * @end end x value
+         * @spd redraw interval
+         */
         function step(x, k, b, dir, end, spd) {
             setTimeout(function () {
                 x = dir ? x + 1 : x - 1;
                 var y = Math.floor(k * x + b);
-                console.log(x, y);
                 if(dir) {
                     if(x >= end) {
-                        moveTo(x, y, (pos()).x, (pos()).y);
+                        moveTo(x, y, (pos(x, y)).x, (pos(x, y)).y);
                         return;
                     }
                 }
                 else{
                     if(x <= end) {
-                        moveTo(x, y, (pos()).x, (pos()).y);
+                        moveTo(x, y, (pos(x, y)).x, (pos(x, y)).y);
                         return;
                     }
                 }
-                document.getElementById("shadow").style.backgroundPositionX = "-" + x + "px";
-                document.getElementById("shadow").style.backgroundPositionY = "-" + y + "px";
-                step(x, k, b, dir, end, spd);
+                // remove background for draw
+                shadowEle.style.backgroundPositionX = "-" + x + "px";
+                shadowEle.style.backgroundPositionY = "-" + y + "px";
+                step(x, k, b, dir, end, spd); // loop
             }, spd);
         }
     </script>
